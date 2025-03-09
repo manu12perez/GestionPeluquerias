@@ -1,0 +1,91 @@
+﻿@model GestionPeluquerias.Models.Peluqueria
+
+@{
+    ViewData["Title"] = "Crear Peluquería";
+}
+
+<h1>Crear Nueva Peluquería</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post" novalidate>
+            <!-- Nombre -->
+            <div class="form-group">
+                <label asp-for="Nombre" class="control-label">Nombre</label>
+                <input asp-for="Nombre" class="form-control" required maxlength="100"
+                       pattern=".{1,100}"
+                       title="El nombre debe tener hasta 100 caracteres." />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+
+            <!-- Dirección -->
+            <div class="form-group">
+                <label asp-for="Direccion" class="control-label">Dirección</label>
+                <input asp-for="Direccion" class="form-control" required maxlength="255"
+                       pattern=".{1,255}"
+                       title="La dirección debe tener hasta 255 caracteres." />
+                <span asp-validation-for="Direccion" class="text-danger"></span>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="form-group">
+                <label asp-for="Telefono" class="control-label">Teléfono</label>
+                <input asp-for="Telefono" class="form-control" required
+                       pattern="\d{9,15}"
+                       title="El teléfono debe tener entre 9 y 15 dígitos numéricos." />
+                <span asp-validation-for="Telefono" class="text-danger"></span>
+            </div>
+
+            <!-- Latitud -->
+            <div class="form-group">
+                <label asp-for="Latitud" class="control-label">Latitud</label>
+                <input asp-for="Latitud" class="form-control" type="number" step="any" required
+                       min="-90" max="90"
+                       title="Ingrese una latitud válida entre -90 y 90." />
+                <span asp-validation-for="Latitud" class="text-danger"></span>
+            </div>
+
+            <!-- Longitud -->
+            <div class="form-group">
+                <label asp-for="Longitud" class="control-label">Longitud</label>
+                <input asp-for="Longitud" class="form-control" type="number" step="any" required
+                       min="-180" max="180"
+                       title="Ingrese una longitud válida entre -180 y 180." />
+                <span asp-validation-for="Longitud" class="text-danger"></span>
+            </div>
+
+            <!-- Horario Apertura -->
+            <div class="form-group">
+                <label asp-for="HorarioApertura" class="control-label">Horario Apertura</label>
+                <input asp-for="HorarioApertura" class="form-control" type="time" required />
+                <span asp-validation-for="HorarioApertura" class="text-danger"></span>
+            </div>
+
+            <!-- Horario Cierre -->
+            <div class="form-group">
+                <label asp-for="HorarioCierre" class="control-label">Horario Cierre</label>
+                <input asp-for="HorarioCierre" class="form-control" type="time" required />
+                <span asp-validation-for="HorarioCierre" class="text-danger"></span>
+            </div>
+
+            <!-- Administrador -->
+            <div class="form-group">
+                <label asp-for="IdUsuario" class="control-label">Administrador</label>
+                <select asp-for="IdUsuario" asp-items="ViewBag.Administradores" class="form-control" required>
+                    <option value="">Seleccione un Administrador</option>
+                </select>
+                <span asp-validation-for="IdUsuario" class="text-danger"></span>
+            </div>
+
+            <!-- Botones -->
+            <button type="submit" class="btn btn-primary">Guardar</button>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

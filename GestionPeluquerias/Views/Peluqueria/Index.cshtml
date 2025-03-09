@@ -1,0 +1,113 @@
+﻿@model IEnumerable<GestionPeluquerias.Models.Peluqueria>
+
+@{
+    ViewData["Title"] = "Gestión de Peluquerías";
+}
+
+<h1>Gestión de Peluquerías</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-success">Crear Nueva Peluquería</a>
+</p>
+
+<!-- Selector de Peluquerías -->
+<div class="form-group">
+    <label for="selectPeluqueria">Seleccione una Peluquería:</label>
+    <select id="selectPeluqueria" class="form-control">
+        <option value="">-- Seleccione --</option>
+        @foreach (var item in Model)
+        {
+            <option value="@item.IdPeluqueria">@item.Nombre</option>
+        }
+    </select>
+</div>
+
+<!-- Área de Detalles -->
+<div id="peluqueriaDetalles" class="mt-4" style="display: none;">
+    <h3>Detalles de la Peluquería</h3>
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Dirección:</th>
+                <td id="detalleDireccion"></td>
+            </tr>
+            <tr>
+                <th>Latitud:</th>
+                <td id="detalleLatitud"></td>
+            </tr>
+            <tr>
+                <th>Longitud:</th>
+                <td id="detalleLongitud"></td>
+            </tr>
+            <tr>
+                <th>Teléfono:</th>
+                <td id="detalleTelefono"></td>
+            </tr>
+            <tr>
+                <th>Horario Apertura:</th>
+                <td id="detalleApertura"></td>
+            </tr>
+            <tr>
+                <th>Horario Cierre:</th>
+                <td id="detalleCierre"></td>
+            </tr>
+            <tr>
+                <th>Administrador:</th>
+                <td id="detalleAdministrador"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a id="editPeluqueria" class="btn btn-primary">Editar</a>
+
+    <!-- Formulario para eliminación segura -->
+    <form id="deleteForm" method="post" asp-action="Delete" style="display:inline;">
+        <input type="hidden" id="deletePeluqueriaId" name="id" />
+        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta peluquería?');">
+            Eliminar
+        </button>
+    </form>
+
+    <!-- Botón de Reserva -->
+    <a id="seleccionarPeluquero" class="btn btn-info">Reservar</a>
+</div>
+
+<!-- Script para manejar la selección y mostrar detalles -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $("#selectPeluqueria").change(function () {
+            var id = $(this).val();
+            if (id) {
+                $.ajax({
+                    url: '@Url.Action("Details", "Peluqueria")' + '/' + encodeURIComponent(id),
+                    type: 'GET',
+                    dataType: 'json',
+                    success: function (data) {
+                        $("#detalleDireccion").text(data.direccion);
+                        $("#detalleLatitud").text(data.latitud);
+                        $("#detalleLongitud").text(data.longitud);
+                        $("#detalleTelefono").text(data.telefono);
+                        $("#detalleApertura").text(data.horarioApertura);
+                        $("#detalleCierre").text(data.horarioCierre);
+                        $("#detalleAdministrador").text(data.administradorNombre);
+
+                        $("#editPeluqueria").attr("href", '@Url.Action("Edit", "Peluqueria")' + '/' + encodeURIComponent(id));
+                        $("#deletePeluqueriaId").val(id);
+                        $("#seleccionarPeluquero").attr("href", '@Url.Action("SeleccionarPeluquero", "Reserva")' + '/' + encodeURIComponent(id));
+
+                        $("#peluqueriaDetalles").show();
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error en AJAX: ", error);
+                        alert("No se pudo obtener los detalles de la peluquería.");
+                        $("#peluqueriaDetalles").hide();
+                    }
+                });
+            } else {
+                $("#peluqueriaDetalles").hide();
+            }
+        });
+    });
+</script>
+
