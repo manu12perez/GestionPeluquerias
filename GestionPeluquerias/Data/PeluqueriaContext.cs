@@ -14,6 +14,8 @@ namespace GestionPeluquerias.Data
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Servicio> Servicios { get; set; }
         public DbSet<PeluqueroServicio> PeluqueroServicios { get; set; } // Tabla intermedia
+        public DbSet<VistaPeluqueriaDetalle> PeluqueriaDetalles { get; set; } // Vista PeluqueriaDetalle
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,6 +24,7 @@ namespace GestionPeluquerias.Data
             // Configurar clave primaria compuesta en la tabla intermedia PeluqueroServicios
             modelBuilder.Entity<PeluqueroServicio>()
                 .HasKey(ps => new { ps.IdPeluquero, ps.IdServicio });
+
         }
     }
 }

@@ -1,0 +1,36 @@
+﻿@model GestionPeluquerias.Models.Peluquero
+@{
+    ViewData["Title"] = "Crear Peluquero";
+}
+
+<h1>Crear Peluquero</h1>
+<h4>Añadir nuevo peluquero a la peluquería</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="CreatePeluquero">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- No mostramos el IdPeluquero ya que se genera automáticamente en el repositorio -->
+            <input type="hidden" asp-for="IdPeluquero" />
+
+            <div class="form-group mb-3">
+                <label asp-for="IdUsuario" class="control-label">ID Usuario</label>
+                <input asp-for="IdUsuario" class="form-control" />
+                <span asp-validation-for="IdUsuario" class="text-danger"></span>
+                <small class="text-muted">Ingrese el ID del usuario que será el peluquero</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdPeluqueria" class="control-label">ID Peluquería</label>
+                <input asp-for="IdPeluqueria" class="form-control" value="@ViewData["IDPELUQUERIA"]" readonly />
+                <span asp-validation-for="IdPeluqueria" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" class="btn btn-secondary">Volver</a>
+            </div>
+        </form>
+    </div>
+</div>

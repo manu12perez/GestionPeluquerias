@@ -22,6 +22,8 @@
     </select>
 </div>
 
+<div id="mensajeError" class="alert alert-warning mt-3" style="display: none;"></div>
+
 <!-- Área de Detalles -->
 <div id="peluqueriaDetalles" class="mt-4" style="display: none;">
     <h3>Detalles de la Peluquería</h3>
@@ -30,14 +32,6 @@
             <tr>
                 <th>Dirección:</th>
                 <td id="detalleDireccion"></td>
-            </tr>
-            <tr>
-                <th>Latitud:</th>
-                <td id="detalleLatitud"></td>
-            </tr>
-            <tr>
-                <th>Longitud:</th>
-                <td id="detalleLongitud"></td>
             </tr>
             <tr>
                 <th>Teléfono:</th>
@@ -58,14 +52,37 @@
         </tbody>
     </table>
 
+    <h3>Peluqueros</h3>
+    <div id="noPeluqueros" class="alert alert-info" style="display: none;">No hay peluqueros disponibles</div>
+    <table id="tablaPeluqueros" class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <h3>Servicios Disponibles</h3>
+    <div id="noServicios" class="alert alert-info" style="display: none;">No hay servicios disponibles</div>
+    <table id="tablaServicios" class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Precio</th>
+                <th>Duración</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
     <a id="editPeluqueria" class="btn btn-primary">Editar</a>
 
     <!-- Formulario para eliminación segura -->
     <form id="deleteForm" method="post" asp-action="Delete" style="display:inline;">
         <input type="hidden" id="deletePeluqueriaId" name="id" />
-        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta peluquería?');">
-            Eliminar
-        </button>
+        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta peluquería?');">Eliminar</button>
     </form>
 
     <!-- Botón de Reserva -->
@@ -80,34 +97,94 @@
             var id = $(this).val();
             if (id) {
                 $.ajax({
-                    url: '@Url.Action("Details", "Peluqueria")' + '/' + encodeURIComponent(id),
+                    url: '@Url.Action("Detalles", "Peluqueria")' + '/' + encodeURIComponent(id),
                     type: 'GET',
                     dataType: 'json',
                     success: function (data) {
-                        $("#detalleDireccion").text(data.direccion);
-                        $("#detalleLatitud").text(data.latitud);
-                        $("#detalleLongitud").text(data.longitud);
-                        $("#detalleTelefono").text(data.telefono);
-                        $("#detalleApertura").text(data.horarioApertura);
-                        $("#detalleCierre").text(data.horarioCierre);
-                        $("#detalleAdministrador").text(data.administradorNombre);
+                        // Ocultar mensaje de error si estaba visible
+                        $("#mensajeError").hide();
 
-                        $("#editPeluqueria").attr("href", '@Url.Action("Edit", "Peluqueria")' + '/' + encodeURIComponent(id));
-                        $("#deletePeluqueriaId").val(id);
-                        $("#seleccionarPeluquero").attr("href", '@Url.Action("SeleccionarPeluquero", "Reserva")' + '/' + encodeURIComponent(id));
+                        if (data.length === 0) {
+                            $("#mensajeError").text("No se encontraron detalles para esta peluquería.").show();
+                            $("#peluqueriaDetalles").hide();
+                            return;
+                        }
 
-                        $("#peluqueriaDetalles").show();
+                        // Tomamos el primer objeto para la información general de la peluquería
+                        var infoPeluqueria = data[0];
+                        if (infoPeluqueria == null) {
+                            $("#mensajeError").text("No se han encontrado los detalles de esta peluquería.").show();
+                            $("#peluqueriaDetalles").hide();
+                        } else {
+                            $("#detalleDireccion").text(infoPeluqueria.direccion || "No disponible");
+                            $("#detalleTelefono").text(infoPeluqueria.telefono || "No disponible");
+                            $("#detalleApertura").text(infoPeluqueria.horarioApertura || "No disponible");
+                            $("#detalleCierre").text(infoPeluqueria.horarioCierre || "No disponible");
+                            $("#detalleAdministrador").text(infoPeluqueria.nombreAdministrador || "No disponible");
+
+                            $("#editPeluqueria").attr("href", '@Url.Action("Edit", "Peluqueria")' + '/' + encodeURIComponent(id));
+                            $("#deletePeluqueriaId").val(id);
+                            $("#seleccionarPeluquero").attr("href", '@Url.Action("SeleccionarPeluquero", "Reserva")' + '/' + encodeURIComponent(id));
+
+                            // Inicializar variables para rastrear si hay peluqueros y servicios
+                            var hayPeluqueros = false;
+                            var hayServicios = false;
+
+                            // Limpiar y llenar la tabla de peluqueros
+                            $("#tablaPeluqueros tbody").empty();
+                            var peluquerosAgregados = new Set();
+
+                            data.forEach(function (item) {
+                                if (item.nombrePeluquero && !peluquerosAgregados.has(item.nombrePeluquero)) {
+                                    $("#tablaPeluqueros tbody").append("<tr><td>" + item.nombrePeluquero + "</td></tr>");
+                                    peluquerosAgregados.add(item.nombrePeluquero);
+                                    hayPeluqueros = true;
+                                }
+                            });
+
+                            // Mostrar mensaje si no hay peluqueros
+                            if (hayPeluqueros) {
+                                $("#tablaPeluqueros").show();
+                                $("#noPeluqueros").hide();
+                            } else {
+                                $("#tablaPeluqueros").hide();
+                                $("#noPeluqueros").show();
+                            }
+
+                            // Limpiar y llenar la tabla de servicios
+                            $("#tablaServicios tbody").empty();
+
+                            data.forEach(function (item) {
+                                if (item.nombreServicio) {
+                                    let duracion = item.duracion ? item.duracion + " min" : "No disponible";
+                                    $("#tablaServicios tbody").append("<tr><td>" + item.nombreServicio + "</td><td>" + (item.descripcion || "Sin descripción") + "</td><td>" + item.precioServicio + "€</td><td>" + duracion + "</td></tr>");
+                                    hayServicios = true;
+                                }
+                            });
+
+                            // Mostrar mensaje si no hay servicios
+                            if (hayServicios) {
+                                $("#tablaServicios").show();
+                                $("#noServicios").hide();
+                            } else {
+                                $("#tablaServicios").hide();
+                                $("#noServicios").show();
+                            }
+
+                            // Mostrar el área de detalles
+                            $("#peluqueriaDetalles").show();
+                        }
                     },
                     error: function (xhr, status, error) {
                         console.error("Error en AJAX: ", error);
-                        alert("No se pudo obtener los detalles de la peluquería.");
+                        $("#mensajeError").text("No se pudo obtener los detalles de la peluquería: " + error).show();
                         $("#peluqueriaDetalles").hide();
                     }
                 });
             } else {
                 $("#peluqueriaDetalles").hide();
+                $("#mensajeError").hide();
             }
         });
     });
 </script>
-

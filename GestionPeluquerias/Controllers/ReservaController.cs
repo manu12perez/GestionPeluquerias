@@ -10,10 +10,12 @@ namespace GestionPeluquerias.Controllers
     public class ReservaController : Controller
     {
         private IRepositoryPeluquerias repoPelu;
+        private IRepositoryUsuarios repoUsuario;
 
-        public ReservaController(IRepositoryPeluquerias repoPeluquerias)
+        public ReservaController(IRepositoryPeluquerias repoPeluquerias, IRepositoryUsuarios repoUsuario)
         {
-            repoPelu = repoPeluquerias;
+            this.repoPelu = repoPeluquerias;
+            this.repoUsuario = repoUsuario;
         }
 
         [Route("Reserva/SeleccionarPeluquero/{idPeluqueria}")]
@@ -38,6 +40,49 @@ namespace GestionPeluquerias.Controllers
             List<Servicio> servicios = await repoPelu.GetServiciosByIdPeluqueria(idpeluqueria);
 
             return View(servicios);
+        }
+
+        public async Task<IActionResult> CreatePeluquero(int idpeluqueria)
+        {
+            ViewData["IDPELUQUERIA"] = idpeluqueria;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreatePeluquero(Peluquero peluquero)
+        {
+            // Verificar que los IDs existan, pero NO asignar las entidades
+            var usuario = await this.repoUsuario.FindUsuarioAsync(peluquero.IdUsuario);
+            if (usuario == null)
+            {
+                ModelState.AddModelError("IdUsuario", "El usuario no existe");
+                ViewData["IDPELUQUERIA"] = peluquero.IdPeluqueria;
+                return View(peluquero);
+            }
+
+            var peluqueria = await this.repoPelu.FindPeluqueriaAsync(peluquero.IdPeluqueria);
+            if (peluqueria == null)
+            {
+                ModelState.AddModelError("IdPeluqueria", "La peluquería no existe");
+                ViewData["IDPELUQUERIA"] = peluquero.IdPeluqueria;
+                return View(peluquero);
+            }
+
+            await this.repoPelu.InsertPeluqueroAsync(peluquero);
+            return RedirectToAction("CreateServicio", new { idpeluqueria = peluquero.IdPeluqueria });
+        }
+
+        public async Task<IActionResult> CreateServicio(int idpeluqueria)
+        {
+            ViewData["IDPELUQUERIA"] = idpeluqueria;
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateServicio(Servicio servicio)
+        {            
+            await this.repoPelu.InserServicioAsync(servicio);
+            return RedirectToAction("Index", "Peluqueria");
         }
 
     }

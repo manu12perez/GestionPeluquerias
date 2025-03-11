@@ -1,0 +1,54 @@
+﻿@model GestionPeluquerias.Models.Servicio
+@{
+    ViewData["Title"] = "Crear Servicio";
+}
+
+<h1>Crear Servicio</h1>
+<h4>Añadir nuevo servicio a la peluquería</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="CreateServicio">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <!-- No mostramos el IdServicio ya que se genera automáticamente en el repositorio -->
+            <input type="hidden" asp-for="IdServicio" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Nombre" class="control-label">Nombre del servicio</label>
+                <input asp-for="Nombre" class="form-control" />
+                <span asp-validation-for="Nombre" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Descripcion" class="control-label">Descripción</label>
+                <textarea asp-for="Descripcion" class="form-control" rows="3" name="Descripcion"></textarea>
+                <span asp-validation-for="Descripcion" class="text-danger"></span>
+                <small class="text-muted">Descripción opcional del servicio</small>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Precio" class="control-label">Precio (€)</label>
+                <input asp-for="Precio" class="form-control" type="number" step="0.01" min="0" />
+                <span asp-validation-for="Precio" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Duracion" class="control-label">Duración (minutos)</label>
+                <input asp-for="Duracion" class="form-control" type="number" min="1" />
+                <span asp-validation-for="Duracion" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="IdPeluqueria" class="control-label">ID Peluquería</label>
+                <input asp-for="IdPeluqueria" class="form-control" value="@ViewData["IDPELUQUERIA"]" readonly />
+                <span asp-validation-for="IdPeluqueria" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" class="btn btn-secondary">Volver</a>
+            </div>
+        </form>
+    </div>
+</div>

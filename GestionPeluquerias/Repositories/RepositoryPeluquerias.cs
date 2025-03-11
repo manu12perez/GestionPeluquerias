@@ -7,6 +7,31 @@ using System.Threading.Tasks;
 
 #region Vistas y Procedimientos Almacenados
 /*
+CREATE VIEW vw_DetallesPeluqueria AS
+SELECT 
+    CAST(ROW_NUMBER() OVER (ORDER BY p.IdPeluqueria) AS INT) AS Id, 
+    CAST(p.IdPeluqueria AS INT) AS IdPeluqueria,
+    p.Nombre AS NombrePeluqueria,
+    p.Direccion,
+    p.Telefono,
+    p.HorarioApertura,
+    p.HorarioCierre,
+    u.Nombre AS NombreAdministrador,
+    CAST(pe.IdPeluquero AS INT) AS IdPeluquero,
+    CAST(pe.IdUsuario AS INT) AS IdUsuarioPeluquero,
+    up.Nombre AS NombrePeluquero,
+    CAST(s.IdServicio AS INT) AS IdServicio,
+    s.Nombre AS NombreServicio,
+    s.Descripcion,
+    s.Precio AS PrecioServicio,
+    CAST(ISNULL(s.Duracion, 0) AS INT) AS Duracion
+FROM Peluquerias p
+LEFT JOIN Usuarios u ON p.IdUsuario = u.IdUsuario
+LEFT JOIN Peluqueros pe ON p.IdPeluqueria = pe.IdPeluqueria
+LEFT JOIN Usuarios up ON pe.IdUsuario = up.IdUsuario
+LEFT JOIN Servicios s ON p.IdPeluqueria = s.IdPeluqueria;
+
+
 
 CREATE VIEW vw_ServiciosPeluquerosPeluquerias AS
 SELECT 
@@ -28,6 +53,7 @@ GO
 
 namespace GestionPeluquerias.Repositories
 {
+    #region Repository de Peluqerías
     public class RepositoryPeluquerias : IRepositoryPeluquerias
     {
         private  PeluqueriaContext context;
@@ -57,6 +83,13 @@ namespace GestionPeluquerias.Repositories
                 .FirstOrDefaultAsync(p => p.IdPeluqueria == idPeluqueria);
         }
 
+        public async Task<List<VistaPeluqueriaDetalle>> GetPeluqueriaDetallesAsync(int idPeluqueria)
+        {
+            string sql = "SELECT * FROM vw_DetallesPeluqueria WHERE IdPeluqueria = @p0";
+            return await context.PeluqueriaDetalles.FromSqlRaw(sql, idPeluqueria).ToListAsync();
+        }
+
+
         public async Task<int> GetMaxIdPeluqueriaAsync()
         {
             if (!await context.Peluquerias.AnyAsync())
@@ -66,7 +99,7 @@ namespace GestionPeluquerias.Repositories
             return await context.Peluquerias.MaxAsync(p => p.IdPeluqueria);
         }
 
-        public async Task InsertPeluqueriaAsync(Peluqueria peluqueria)
+        public async Task<Peluqueria> InsertPeluqueriaAsync(Peluqueria peluqueria)
         {
             int maxId = await context.Peluquerias.AnyAsync()
                 ? await context.Peluquerias.MaxAsync(p => p.IdPeluqueria)
@@ -76,6 +109,8 @@ namespace GestionPeluquerias.Repositories
 
             await context.Peluquerias.AddAsync(peluqueria);
             await context.SaveChangesAsync();
+
+            return peluqueria;
         }
 
 
@@ -119,5 +154,103 @@ namespace GestionPeluquerias.Repositories
 
             return await consulta.ToListAsync();
         }
+
+        public async Task InsertPeluqueroAsync(Peluquero peluquero)
+        {
+            int maxId = await context.Peluqueros.AnyAsync()
+                ? await context.Peluqueros.MaxAsync(p => p.IdPeluquero)
+                : 0;
+
+            peluquero.IdPeluquero = maxId + 1;
+            this.context.Peluqueros.Add(peluquero);
+            await this.context.SaveChangesAsync();
+        }
+
+        public async Task InserServicioAsync(Servicio servicio)
+        {
+            int maxId = await context.Servicios.AnyAsync()
+                ? await context.Servicios.MaxAsync(p => p.IdServicio)
+                : 0;
+
+            servicio.IdServicio = maxId + 1;
+            this.context.Servicios.Add(servicio);
+            await this.context.SaveChangesAsync();
+        }
     }
+
+
+    #endregion
+
+    #region Repository de Usuarios
+    public class RepositoryUsuarios : IRepositoryUsuarios
+    {
+        private PeluqueriaContext context;
+
+        public RepositoryUsuarios(PeluqueriaContext context)
+        {
+            this.context = context;
+        }
+
+        public async Task<List<Usuario>> GetUsuariosAsync()
+        {
+            return await context.Usuarios
+                .Include(u => u.Rol)
+                .ToListAsync();
+        }
+
+        public async Task<Usuario?> FindUsuarioAsync(int idUsuario)
+        {
+            return await context.Usuarios
+                .Include(u => u.Rol)
+                .FirstOrDefaultAsync(u => u.IdUsuario == idUsuario);
+        }
+
+        public async Task<List<Usuario>> GetAdministradoresAsync()
+        {
+            return await context.Usuarios
+                .AsNoTracking()
+                .Where(u => u.IdRol == 1)
+                .ToListAsync();
+        }
+
+        public async Task InsertUsuarioAsync(Usuario usuario)
+        {
+            usuario.IdUsuario = await context.Usuarios.AnyAsync()
+                ? await context.Usuarios.MaxAsync(u => u.IdUsuario) + 1
+                : 1;
+
+            await context.Usuarios.AddAsync(usuario);
+            await context.SaveChangesAsync();
+        }
+
+        public async Task<bool> UpdateUsuarioAsync(Usuario usuario)
+        {
+            var existingUsuario = await context.Usuarios.FindAsync(usuario.IdUsuario);
+            if (existingUsuario == null)
+                return false;
+
+            existingUsuario.Nombre = usuario.Nombre;
+            existingUsuario.Apellido = usuario.Apellido;
+            existingUsuario.Email = usuario.Email;
+            existingUsuario.Password = usuario.Password;
+            existingUsuario.Telefono = usuario.Telefono;
+            existingUsuario.IdRol = usuario.IdRol;
+
+            context.Usuarios.Update(existingUsuario);
+            await context.SaveChangesAsync();
+            return true;
+        }
+
+        public async Task<bool> DeleteUsuarioAsync(int idUsuario)
+        {
+            var usuario = await context.Usuarios.FindAsync(idUsuario);
+            if (usuario == null)
+                return false;
+
+            context.Usuarios.Remove(usuario);
+            await context.SaveChangesAsync();
+            return true;
+        }
+    }
+    #endregion
 }

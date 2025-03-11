@@ -25,27 +25,38 @@ namespace GestionPeluquerias.Controllers
             return View(peluquerias);
         }
 
-        public async Task<IActionResult> Details(int id)
+        public async Task<IActionResult> Detalles(int id)
         {
-            var peluqueria = await repoPelu.FindPeluqueriaAsync(id);
-            if (peluqueria == null)
+            var detalles = await repoPelu.GetPeluqueriaDetallesAsync(id);
+            if (detalles == null || !detalles.Any())
             {
-                return NotFound();
+                return Json(new { error = "No hay información disponible para esta peluquería." });
             }
 
-            var administrador = await repoUsuarios.FindUsuarioAsync(peluqueria.IdUsuario);
+            // Opcionalmente, puedes procesar los datos antes de enviarlos
+            // para manejar valores nulos con valores predeterminados
+            var resultado = detalles.Select(d => new {
+                d.Id,
+                d.IdPeluqueria,
+                d.NombrePeluqueria,
+                d.Direccion,
+                d.Telefono,
+                d.HorarioApertura,
+                d.HorarioCierre,
+                d.NombreAdministrador,
+                IdPeluquero = d.IdPeluquero ?? 0,
+                NombrePeluquero = d.NombrePeluquero ?? "No asignado",
+                IdServicio = d.IdServicio ?? 0,
+                NombreServicio = d.NombreServicio ?? "No disponible",
+                Descripcion = string.IsNullOrEmpty(d.Descripcion) ? "Sin descripción" : d.Descripcion,
+                PrecioServicio = d.PrecioServicio ?? 0,
+                d.Duracion
+            });
 
-            return Json(new
-            {
-                direccion = peluqueria.Direccion,
-                latitud = peluqueria.Latitud,
-                longitud = peluqueria.Longitud,
-                telefono = peluqueria.Telefono,
-                horarioApertura = peluqueria.HorarioApertura.ToString(@"hh\:mm"),
-                horarioCierre = peluqueria.HorarioCierre.ToString(@"hh\:mm"),
-                administradorNombre = (administrador != null) ? administrador.Nombre : "Desconocido"
-        });
+            return Json(resultado);
         }
+
+
 
         // Vista para crear una nueva peluquería
         public async Task<IActionResult> Create()
@@ -58,7 +69,7 @@ namespace GestionPeluquerias.Controllers
         public async Task<IActionResult> Create(Peluqueria peluqueria)
         {
             await this.repoPelu.InsertPeluqueriaAsync(peluqueria);
-            return RedirectToAction("Index");
+            return RedirectToAction("CreatePeluquero", "Reserva", new { idpeluqueria = peluqueria.IdPeluqueria });
         }
 
 
