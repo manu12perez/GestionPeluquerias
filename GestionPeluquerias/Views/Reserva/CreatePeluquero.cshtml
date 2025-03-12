@@ -14,6 +14,8 @@
             <!-- No mostramos el IdPeluquero ya que se genera automáticamente en el repositorio -->
             <input type="hidden" asp-for="IdPeluquero" />
 
+            <input type="hidden" name="redirectToSeleccionar" value="@(Convert.ToBoolean(ViewData["REDIRECTTOSELECCIONAR"] ?? false) ? "true" : "false")" />
+
             <div class="form-group mb-3">
                 <label asp-for="IdUsuario" class="control-label">ID Usuario</label>
                 <input asp-for="IdUsuario" class="form-control" />

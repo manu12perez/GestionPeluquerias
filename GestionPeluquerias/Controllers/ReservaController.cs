@@ -42,14 +42,15 @@ namespace GestionPeluquerias.Controllers
             return View(servicios);
         }
 
-        public async Task<IActionResult> CreatePeluquero(int idpeluqueria)
+        public async Task<IActionResult> CreatePeluquero(int idpeluqueria, bool redirectToSeleccionar = false)
         {
             ViewData["IDPELUQUERIA"] = idpeluqueria;
+            ViewData["REDIRECTTOSELECCIONAR"] = redirectToSeleccionar;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreatePeluquero(Peluquero peluquero)
+        public async Task<IActionResult> CreatePeluquero(Peluquero peluquero, bool redirectToSeleccionar)
         {
             // Verificar que los IDs existan, pero NO asignar las entidades
             var usuario = await this.repoUsuario.FindUsuarioAsync(peluquero.IdUsuario);
@@ -69,6 +70,14 @@ namespace GestionPeluquerias.Controllers
             }
 
             await this.repoPelu.InsertPeluqueroAsync(peluquero);
+
+            // Si el parámetro redirectToSeleccionar es true, volvemos a SeleccionarPeluquero
+            if (redirectToSeleccionar == true)
+            {
+                return RedirectToAction("SeleccionarPeluquero", new { idpeluqueria = peluquero.IdPeluqueria });
+            }
+
+            // Si no, seguimos con el flujo normal hacia CreateServicio
             return RedirectToAction("CreateServicio", new { idpeluqueria = peluquero.IdPeluqueria });
         }
 

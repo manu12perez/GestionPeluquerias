@@ -25,68 +25,94 @@
 <div id="mensajeError" class="alert alert-warning mt-3" style="display: none;"></div>
 
 <!-- Área de Detalles -->
-<div id="peluqueriaDetalles" class="mt-4" style="display: none;">
-    <h3>Detalles de la Peluquería</h3>
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Dirección:</th>
-                <td id="detalleDireccion"></td>
-            </tr>
-            <tr>
-                <th>Teléfono:</th>
-                <td id="detalleTelefono"></td>
-            </tr>
-            <tr>
-                <th>Horario Apertura:</th>
-                <td id="detalleApertura"></td>
-            </tr>
-            <tr>
-                <th>Horario Cierre:</th>
-                <td id="detalleCierre"></td>
-            </tr>
-            <tr>
-                <th>Administrador:</th>
-                <td id="detalleAdministrador"></td>
-            </tr>
-        </tbody>
-    </table>
+<div id="peluqueriaDetalles" class="card mt-4" style="display: none;">
+    <div class="card-header bg-primary text-white">
+        <h3 class="mb-0">Detalles de la Peluquería</h3>
+    </div>
+    <div class="card-body">
+        <table class="table table-hover">
+            <tbody>
+                <tr>
+                    <th width="30%">Dirección:</th>
+                    <td id="detalleDireccion"></td>
+                </tr>
+                <tr>
+                    <th>Teléfono:</th>
+                    <td id="detalleTelefono"></td>
+                </tr>
+                <tr>
+                    <th>Horario Apertura:</th>
+                    <td id="detalleApertura"></td>
+                </tr>
+                <tr>
+                    <th>Horario Cierre:</th>
+                    <td id="detalleCierre"></td>
+                </tr>
+                <tr>
+                    <th>Administrador:</th>
+                    <td id="detalleAdministrador"></td>
+                </tr>
+            </tbody>
+        </table>
 
-    <h3>Peluqueros</h3>
-    <div id="noPeluqueros" class="alert alert-info" style="display: none;">No hay peluqueros disponibles</div>
-    <table id="tablaPeluqueros" class="table">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+        <div class="row mt-4">
+            <!-- Peluqueros -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-secondary text-white">
+                        <h4 class="mb-0">Peluqueros</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="noPeluqueros" class="alert alert-info" style="display: none;">No hay peluqueros disponibles</div>
+                        <table id="tablaPeluqueros" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
 
-    <h3>Servicios Disponibles</h3>
-    <div id="noServicios" class="alert alert-info" style="display: none;">No hay servicios disponibles</div>
-    <table id="tablaServicios" class="table">
-        <thead>
-            <tr>
-                <th>Nombre</th>
-                <th>Descripción</th>
-                <th>Precio</th>
-                <th>Duración</th>
-            </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
+            <!-- Servicios -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4 class="mb-0">Servicios Disponibles</h4>
+                    </div>
+                    <div class="card-body">
+                        <div id="noServicios" class="alert alert-info" style="display: none;">No hay servicios disponibles</div>
+                        <table id="tablaServicios" class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Servicio</th>
+                                    <th>Descripción</th>
+                                    <th>Precio</th>
+                                    <th>Duración</th>
+                                    <th>Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <a id="editPeluqueria" class="btn btn-primary">Editar</a>
-
-    <!-- Formulario para eliminación segura -->
-    <form id="deleteForm" method="post" asp-action="Delete" style="display:inline;">
-        <input type="hidden" id="deletePeluqueriaId" name="id" />
-        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta peluquería?');">Eliminar</button>
-    </form>
-
-    <!-- Botón de Reserva -->
-    <a id="seleccionarPeluquero" class="btn btn-info">Reservar</a>
+        <div class="mt-4 d-flex justify-content-between">
+            <div>
+                <a id="editPeluqueria" class="btn btn-primary mr-2">Editar</a>
+                <form id="deleteForm" method="post" asp-action="Delete" style="display:inline;">
+                    <input type="hidden" id="deletePeluqueriaId" name="id" />
+                    <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta peluquería?');">Eliminar</button>
+                </form>
+            </div>
+            <a id="seleccionarPeluquero" class="btn btn-success">Reservar</a>
+        </div>
+    </div>
 </div>
 
 <!-- Script para manejar la selección y mostrar detalles -->
@@ -151,13 +177,33 @@
                                 $("#noPeluqueros").show();
                             }
 
-                            // Limpiar y llenar la tabla de servicios
+                                // Limpiar y llenar la tabla de servicios
                             $("#tablaServicios tbody").empty();
+                            // Usar un Set para rastrear servicios únicos por ID o por nombre
+                            var serviciosAgregados = new Set();
 
                             data.forEach(function (item) {
-                                if (item.nombreServicio) {
+                                // Comprobar si el servicio ya ha sido agregado usando un identificador único
+                                // Aquí usamos nombreServicio como identificador único, pero idealmente
+                                // deberías usar un ID de servicio si está disponible
+                                var servicioId = item.idServicio || item.nombreServicio;
+
+                                if (item.nombreServicio && !serviciosAgregados.has(servicioId)) {
                                     let duracion = item.duracion ? item.duracion + " min" : "No disponible";
-                                    $("#tablaServicios tbody").append("<tr><td>" + item.nombreServicio + "</td><td>" + (item.descripcion || "Sin descripción") + "</td><td>" + item.precioServicio + "€</td><td>" + duracion + "</td></tr>");
+
+                                    // Crear botón de Agregar Cita que pasa idPeluqueria e idServicio
+                                    let botonReserva = '<a href="' + '@Url.Action("AgregarCita", "Citas")' +
+                                                        '?idpeluqueria=' + encodeURIComponent(id) +
+                                                        '&idservicio=' + encodeURIComponent(servicioId) +
+                                                        '" class="btn btn-primary btn-sm">Reservar</a>';
+
+                                    $("#tablaServicios tbody").append("<tr><td>" + item.nombreServicio + "</td><td>" +
+                                        (item.descripcion || "Sin descripción") + "</td><td>" +
+                                        item.precioServicio + "€</td><td>" + duracion + "</td><td>" +
+                                        botonReserva + "</td></tr>");
+
+                                    // Marcar este servicio como ya agregado
+                                    serviciosAgregados.add(servicioId);
                                     hayServicios = true;
                                 }
                             });

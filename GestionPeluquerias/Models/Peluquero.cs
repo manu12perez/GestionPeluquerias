@@ -24,10 +24,6 @@ namespace GestionPeluquerias.Models
         public int IdPeluqueria { get; set; }
         public Peluqueria Peluqueria { get; set; }
 
-        // Relación muchos a muchos con Servicios (mediante PeluqueroServicios)
-        public ICollection<PeluqueroServicio> PeluqueroServicios { get; set; }
-
-
         // Relación con Citas (Un peluquero tiene muchas citas)
         public ICollection<Cita> Citas { get; set; } = new List<Cita>();
     }

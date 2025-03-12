@@ -4,6 +4,7 @@ using GestionPeluquerias.Models;
 using GestionPeluquerias.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc;
 
 #region Vistas y Procedimientos Almacenados
 /*
@@ -135,21 +136,42 @@ namespace GestionPeluquerias.Repositories
 
         public async Task<bool> DeletePeluqueriaAsync(int idPeluqueria)
         {
-            var peluqueria = await context.Peluquerias.FindAsync(idPeluqueria);
+            // Buscar la peluquería y sus entidades relacionadas
+            var peluqueria = await context.Peluquerias
+                .Include(p => p.Peluqueros) // Incluir los peluqueros relacionados
+                .Include(p => p.Servicios) // Incluir los servicios relacionados
+                .FirstOrDefaultAsync(p => p.IdPeluqueria == idPeluqueria);
+
             if (peluqueria == null)
             {
                 return false; // No se encontró la peluquería
             }
 
+            // Primero eliminar los peluqueros relacionados
+            if (peluqueria.Peluqueros.Any())
+            {
+                context.Peluqueros.RemoveRange(peluqueria.Peluqueros);
+            }
+
+            // Luego eliminar los servicios relacionados
+            if (peluqueria.Servicios.Any())
+            {
+                context.Servicios.RemoveRange(peluqueria.Servicios);
+            }
+
+            // Ahora eliminar la peluquería
             context.Peluquerias.Remove(peluqueria);
             await context.SaveChangesAsync();
+
             return true; // Eliminación exitosa
         }
 
-        public async Task<List<Servicio>> GetServiciosByIdPeluqueria(int idPelqueria)
+
+
+        public async Task<List<Servicio>> GetServiciosByIdPeluqueria(int idPeluqueria)
         {
             var consulta = from datos in this.context.Servicios
-                           where datos.IdPeluqueria == idPelqueria
+                           where datos.IdPeluqueria == idPeluqueria
                            select datos;
 
             return await consulta.ToListAsync();
@@ -176,9 +198,28 @@ namespace GestionPeluquerias.Repositories
             this.context.Servicios.Add(servicio);
             await this.context.SaveChangesAsync();
         }
+
+        public async Task InsertCitaAsync(Cita cita)
+        {
+            int maxId = await context.Citas.AnyAsync()
+               ? await context.Citas.MaxAsync(p => p.IdCita)
+               : 0;
+
+            cita.IdCita = maxId + 1;
+            this.context.Citas.Add(cita);
+            await this.context.SaveChangesAsync();
+        }
+
+        public async Task<List<Peluquero>> GetPeluquerosByIdPeluqueria(int idPeluqueria)
+        {
+            var consulta = await this.context.Peluqueros
+                .Include(p => p.Usuario) // Asegura que Usuario se incluya
+                .Where(p => p.IdPeluqueria == idPeluqueria)
+                .ToListAsync();
+
+            return consulta;
+        }
     }
-
-
     #endregion
 
     #region Repository de Usuarios
@@ -254,3 +295,9 @@ namespace GestionPeluquerias.Repositories
     }
     #endregion
 }
+
+
+
+
+
+
