@@ -1,0 +1,254 @@
+﻿@model IEnumerable<GestionPeluquerias.Models.Cita>
+@{
+    ViewData["Title"] = "Calendario de Citas";
+
+    // Variables para el calendario
+    DateTime fechaActual = DateTime.Now.Date;
+    int mesActual = fechaActual.Month;
+    int añoActual = fechaActual.Year;
+
+    // Obtener el primer día del mes y cuántos días tiene el mes
+    DateTime primerDiaMes = new DateTime(añoActual, mesActual, 1);
+    int diasEnMes = DateTime.DaysInMonth(añoActual, mesActual);
+
+    // Determinar en qué día de la semana comienza el mes (0 = domingo, 1 = lunes, etc.)
+    int primerDiaSemana = (int)primerDiaMes.DayOfWeek;
+    if (primerDiaSemana == 0) primerDiaSemana = 7; // Convertir domingo (0) a 7 para que la semana comience en lunes
+
+    // Nombres de los meses en español
+    string[] nombresMeses = {"Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                         "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"};
+}
+
+<style>
+    /* Estilos para el calendario */
+    .calendario-container {
+        margin-bottom: 2rem;
+    }
+
+    .calendario-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+
+    .calendario-titulo {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+    }
+
+    .calendario-nav button {
+        background-color: #f8f9fa;
+        border: 1px solid #dee2e6;
+        padding: 0.5rem 0.75rem;
+        border-radius: 4px;
+        cursor: pointer;
+        margin: 0 0.25rem;
+    }
+
+        .calendario-nav button:hover {
+            background-color: #e9ecef;
+        }
+
+    .calendario-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+        .calendario-table th {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .calendario-table td {
+            border: 1px solid #dee2e6;
+            height: 120px;
+            width: 14.28%;
+            vertical-align: top;
+            padding: 0;
+        }
+
+    .dia-num {
+        padding: 0.25rem;
+        font-weight: 600;
+        background-color: #f8f9fa;
+        text-align: right;
+    }
+
+    .dia-citas {
+        height: calc(100% - 25px);
+        overflow-y: auto;
+        padding: 0.25rem;
+    }
+
+    .cita-item {
+        margin-bottom: 0.25rem;
+        padding: 0.25rem 0.5rem;
+        border-radius: 3px;
+        font-size: 0.8rem;
+        line-height: 1.2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        background-color: rgba(0, 123, 255, 0.1);
+        border-left: 3px solid #0d6efd;
+    }
+
+    .dia-otro-mes {
+        background-color: #f8f9fa;
+        color: #adb5bd;
+    }
+
+    .dia-actual {
+        background-color: rgba(0, 123, 255, 0.1);
+    }
+
+    .tiempo-cita {
+        font-weight: 600;
+        margin-right: 0.25rem;
+    }
+</style>
+
+<div class="container mt-4 mb-5">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+            <h2 class="mb-0">Calendario de Citas</h2>
+            <div>
+                <a asp-action="ListadoCitas" class="btn btn-outline-light">
+                    <i class="bi bi-list"></i> Ver listado
+                </a>
+            </div>
+        </div>
+
+        <div class="card-body">
+            <div class="calendario-container">
+                <div class="calendario-header">
+                    <div class="calendario-titulo">
+                        @nombresMeses[mesActual - 1] @añoActual
+                    </div>
+                    <div class="calendario-nav">
+                        <button onclick="cambiarMes(-1)" title="Mes anterior">
+                            <i class="bi bi-chevron-left"></i>
+                        </button>
+                        <button onclick="volverHoy()" title="Hoy">
+                            Hoy
+                        </button>
+                        <button onclick="cambiarMes(1)" title="Mes siguiente">
+                            <i class="bi bi-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <table class="calendario-table">
+                    <thead>
+                        <tr>
+                            <th>Lunes</th>
+                            <th>Martes</th>
+                            <th>Miércoles</th>
+                            <th>Jueves</th>
+                            <th>Viernes</th>
+                            <th>Sábado</th>
+                            <th>Domingo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int diaActual = 1;
+                            int totalCeldas = 42; // 6 filas x 7 días
+
+                            // Ajustamos el día de inicio (primerDiaSemana) para que comience en lunes (1)
+                            int diasAjustados = primerDiaSemana - 1;
+                            if (diasAjustados == 0) diasAjustados = 7;
+
+                            for (int i = 0; i < 6; i++) // 6 filas
+                            {
+                                <tr>
+                                    @for (int j = 1; j <= 7; j++) // 7 días de la semana
+                                    {
+                                        int indiceCelda = i * 7 + j;
+                                        int diaMostrar = indiceCelda - diasAjustados;
+
+                                        if (diaMostrar > 0 && diaMostrar <= diasEnMes)
+                                        {
+                                            // Determinar si es el día actual
+                                            bool esDiaActual = (diaMostrar == fechaActual.Day &&
+                                            mesActual == fechaActual.Month &&
+                                            añoActual == fechaActual.Year);
+
+                                            <td class="@(esDiaActual ? "dia-actual" : "")">
+                                                <div class="dia-num">@diaMostrar</div>
+                                                <div class="dia-citas">
+                                                    @{
+                                                        // Filtrar citas para este día
+                                                        var citasDelDia = Model.Where(c =>
+                                                        c.FechaCita.Day == diaMostrar &&
+                                                        c.FechaCita.Month == mesActual &&
+                                                        c.FechaCita.Year == añoActual)
+                                                        .OrderBy(c => c.HoraCita);
+
+                                                        foreach (var cita in citasDelDia)
+                                                        {
+                                                            <div class="cita-item" title="@cita.Usuario.Nombre - @cita.Servicio.Nombre">
+                                                                <span class="tiempo-cita">@cita.HoraCita.Hours.ToString("00"):@cita.HoraCita.Minutes.ToString("00")</span>
+                                                                @cita.Usuario.Nombre.Split(' ')[0] - @cita.Servicio.Nombre
+                                                            </div>
+                                                        }
+                                                    }
+                                                </div>
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td class="dia-otro-mes"></td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center py-3">
+            <span class="text-muted">Total: @(Model?.Count() ?? 0) citas</span>
+            <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cambiarMes(direccion) {
+        // Esta función se implementaría con un envío de formulario o una llamada Ajax
+        // para cambiar el mes mostrado en el calendario
+        let url = new URL(window.location.href);
+
+        // Obtenemos el mes y año actuales
+        let fecha = new Date(@añoActual, @(mesActual - 1) + direccion, 1);
+
+        // Actualizamos los parámetros de la URL
+        url.searchParams.set('mes', fecha.getMonth() + 1);
+        url.searchParams.set('año', fecha.getFullYear());
+
+        // Redirigimos a la nueva URL
+        window.location.href = url.toString();
+    }
+
+    function volverHoy() {
+        // Función para volver al mes actual
+        let url = new URL(window.location.href);
+        let hoy = new Date();
+
+        url.searchParams.set('mes', hoy.getMonth() + 1);
+        url.searchParams.set('año', hoy.getFullYear());
+
+        window.location.href = url.toString();
+    }
+</script>

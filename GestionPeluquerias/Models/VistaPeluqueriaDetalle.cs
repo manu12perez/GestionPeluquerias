@@ -11,14 +11,13 @@ namespace GestionPeluquerias.Models
         public string NombrePeluqueria { get; set; }
         public string Direccion { get; set; }
         public string Telefono { get; set; }
-        // Propiedades string ya son referencias y pueden ser null naturalmente
 
-        // Tipos de valor que deben ser explícitamente marcados como nullable
+
         public TimeSpan? HorarioApertura { get; set; }
         public TimeSpan? HorarioCierre { get; set; }
         public string NombreAdministrador { get; set; }
 
-        // Propiedades que pueden ser nulas debido a los LEFT JOIN
+
         public int? IdPeluquero { get; set; }
         public int? IdUsuarioPeluquero { get; set; }
         public string NombrePeluquero { get; set; }
@@ -26,6 +25,6 @@ namespace GestionPeluquerias.Models
         public string NombreServicio { get; set; }
         public string Descripcion { get; set; }
         public decimal? PrecioServicio { get; set; }
-        public int? Duracion { get; set; } // A pesar del ISNULL, es mejor marcarlo nullable
+        public int? Duracion { get; set; }
     }
 }

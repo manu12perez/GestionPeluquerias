@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@{
+    var rol = @Context.Session.GetString("Rol");
+}
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -6,28 +10,281 @@
     <title>@ViewData["Title"] - GestionPeluquerias</title>
     <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/GestionPeluquerias.styles.css" asp-append-version="true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+        :root {
+        --primary-color: #1a5276;
+        --secondary-color: #154360;
+        --accent-color: #ff6e40;
+        --light-bg: #f5f5f5;
+        --dark-text: #333;
+        }
+
+        html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        }
+
+        body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background-color: var(--light-bg);
+        color: var(--dark-text);
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        position: relative;
+        }
+
+        /* Navbar styling */
+        .navbar {
+        background: linear-gradient(to right, #1a5276, #154360) !important;
+        padding: 0.8rem 1rem;
+        }
+
+        .navbar-brand {
+        padding: 0;
+        }
+
+        .navbar-brand img {
+        border-radius: 50%;
+        border: 2px solid white;
+        transition: transform 0.3s ease;
+        }
+
+        .navbar-brand img:hover {
+        transform: scale(1.05);
+        }
+
+        .navbar .nav-link {
+        color: white !important;
+        font-weight: 500;
+        margin: 0 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        }
+
+        .navbar .nav-link:hover {
+        background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .nav-link.text-danger, .nav-link.text-primary {
+        background-color: rgba(255, 255, 255, 0.15);
+        border-radius: 20px;
+        padding: 0.35rem 1.2rem !important;
+        margin-left: 1rem;
+        }
+
+        .nav-link.text-danger {
+        color: #fff !important;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-link.text-danger:hover {
+        background-color: rgba(220, 53, 69, 0.7);
+        }
+
+        .nav-link.text-primary {
+        color: #fff !important;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .nav-link.text-primary:hover {
+        background-color: rgba(13, 110, 253, 0.7);
+        }
+
+        /* Welcome message */
+        .navbar-nav .nav-link span {
+        color: #fff !important;
+        font-weight: 500;
+        }
+
+        /* Main content */
+        .container {
+        background-color: white;
+        border-radius: 8px;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-top: 1.5rem;
+        margin-bottom: 1.5rem;
+        flex: 1 0 auto;
+        }
+
+        main {
+        min-height: 50vh; /* Asegura que el contenido principal tenga altura mínima */
+        }
+
+
+        /* Button styling */
+        .btn {
+        border-radius: 4px;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+        }
+
+        .btn-primary:hover {
+        background-color: #4a57a8;
+        border-color: #4a57a8;
+        }
+
+        .btn-success {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+        }
+
+        .btn-success:hover {
+        background-color: #7b1fa2;
+        border-color: #7b1fa2;
+        }
+
+        .btn-danger {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        }
+
+        .btn-danger:hover {
+        background-color: #e65c34;
+        border-color: #e65c34;
+        }
+
+        /* Card styling */
+        .card {
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+        transform: translateY(-5px);
+        }
+
+        .card-header {
+        border-bottom: none;
+        border-radius: 8px 8px 0 0 !important;
+        font-weight: 600;
+        }
+
+        /* Table styling */
+        .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        }
+
+        .table th {
+        background-color: rgba(92, 107, 192, 0.1);
+        border-top: none;
+        border-bottom: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        font-weight: 600;
+        }
+
+        .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        .table-hover tbody tr:hover {
+        background-color: rgba(92, 107, 192, 0.05);
+        }
+
+        /* Form styling */
+        .form-control, .form-select {
+        border-radius: 4px;
+        border: 1px solid #ced4da;
+        padding: 0.6rem 1rem;
+        }
+
+        .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(92, 107, 192, 0.25);
+        }
+
+        /* Responsive adjustments */
+        @@media (max-width: 768px) {
+        .container {
+        padding: 1rem;
+        }
+
+        .navbar-brand img {
+        width: 50px;
+        height: 50px;
+        }
+        }
+
+        .navbar-brand img {
+        width: 50px;
+        height: 50px;
+        }
+
+        .navbar-brand img {
+        width: 50px;
+        height: 50px;
+        }
+    </style>
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-dark border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Peluqueria" asp-action="Index">
-                    <img src="~/images/Peluqueria.jpg" style="width:70px; height:70px" />
+                    <img src="~/images/Peluqueria.jpg" alt="Logo Peluquería" style="width:70px; height:70px" />
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+                aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Peluqueria" asp-action="Index">Peluquerias</a>
+                            <a class="nav-link" asp-area="" asp-controller="Peluqueria" asp-action="Index">
+                                <i class="fas fa-cut me-1"></i>Peluquerías
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link" asp-area="" asp-controller="Citas" asp-action="Citas">
+                                <i class="far fa-calendar-alt me-1"></i>Citas
+                            </a>
                         </li>
+                        @if (@rol == "Admin")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link" asp-area="" asp-controller="Usuarios" asp-action="MostrarUsuarios">
+                                    <i class="fas fa-users me-1"></i>Usuarios
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                    <ul class="navbar-nav">
+                        @if (Context.Session.GetInt32("IdUsuario") != null)
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link">
+                                    <i class="fas fa-user-circle me-1"></i>
+                                    Bienvenido, @Context.Session.GetString("Nombre") @Context.Session.GetString("Apellido")
+                                    <span class="badge bg-dark-subtle text-dark ms-1">@Context.Session.GetString("Rol")</span>
+                                </span>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-danger" asp-controller="Managed" asp-action="Logout">
+                                    <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-primary" asp-controller="Managed" asp-action="Login">
+                                    <i class="fas fa-sign-in-alt me-1"></i>Iniciar Sesión
+                                </a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>
@@ -38,12 +295,6 @@
             @RenderBody()
         </main>
     </div>
-
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - GestionPeluquerias - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

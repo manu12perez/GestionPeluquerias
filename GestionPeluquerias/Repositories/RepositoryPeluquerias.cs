@@ -55,6 +55,7 @@ GO
 namespace GestionPeluquerias.Repositories
 {
     #region Repository de Peluqerías
+
     public class RepositoryPeluquerias : IRepositoryPeluquerias
     {
         private  PeluqueriaContext context;
@@ -90,7 +91,6 @@ namespace GestionPeluquerias.Repositories
             return await context.PeluqueriaDetalles.FromSqlRaw(sql, idPeluqueria).ToListAsync();
         }
 
-
         public async Task<int> GetMaxIdPeluqueriaAsync()
         {
             if (!await context.Peluquerias.AnyAsync())
@@ -113,7 +113,6 @@ namespace GestionPeluquerias.Repositories
 
             return peluqueria;
         }
-
 
         public async Task UpdatePeluqueriaAsync(Peluqueria peluqueria)
         {
@@ -166,8 +165,6 @@ namespace GestionPeluquerias.Repositories
             return true; // Eliminación exitosa
         }
 
-
-
         public async Task<List<Servicio>> GetServiciosByIdPeluqueria(int idPeluqueria)
         {
             var consulta = from datos in this.context.Servicios
@@ -210,6 +207,18 @@ namespace GestionPeluquerias.Repositories
             await this.context.SaveChangesAsync();
         }
 
+        public async Task<List<Cita>> GetCitasPeluqeros(int idUsuario)
+        {
+            return await this.context.Citas
+                .Include(c => c.Usuario)
+                .Include(c => c.Peluqueria)
+                .Include(c => c.Peluquero)
+                    .ThenInclude(p => p.Usuario)
+                .Include(c => c.Servicio)
+                .Where(c => c.Peluquero.IdUsuario == idUsuario)
+                .ToListAsync();
+        }
+
         public async Task<List<Peluquero>> GetPeluquerosByIdPeluqueria(int idPeluqueria)
         {
             var consulta = await this.context.Peluqueros
@@ -219,10 +228,32 @@ namespace GestionPeluquerias.Repositories
 
             return consulta;
         }
+
+        public async Task<List<Cita>> GetCitasByIdAsync(int idUsuario)
+        {
+            return await this.context.Citas
+                .Include(c => c.Usuario)
+                .Include(c => c.Peluqueria)
+                .Include(c => c.Peluquero)
+                    .ThenInclude(p => p.Usuario)
+                .Include(c => c.Servicio)
+                .Where(c => c.IdUsuario == idUsuario)
+                .ToListAsync();
+        }
+
+        public async Task<List<Usuario>> GetPeluquerosAsync()
+        {
+            var consulta = from datos in this.context.Usuarios
+                .Where(x => x.IdRol == 2)
+                           select datos;
+
+            return await consulta.ToListAsync();
+        }
     }
     #endregion
 
     #region Repository de Usuarios
+
     public class RepositoryUsuarios : IRepositoryUsuarios
     {
         private PeluqueriaContext context;
@@ -295,9 +326,3 @@ namespace GestionPeluquerias.Repositories
     }
     #endregion
 }
-
-
-
-
-
-

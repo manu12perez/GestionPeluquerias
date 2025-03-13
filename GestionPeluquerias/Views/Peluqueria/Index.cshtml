@@ -2,13 +2,16 @@
 
 @{
     ViewData["Title"] = "Gestión de Peluquerías";
+    var rol = @Context.Session.GetString("Rol");
 }
 
 <h1>Gestión de Peluquerías</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-success">Crear Nueva Peluquería</a>
-</p>
+@if (@rol == "Admin" ){
+    <p>
+        <a asp-action="Create" class="btn btn-success">Crear Nueva Peluquería</a>
+    </p>
+}
 
 <!-- Selector de Peluquerías -->
 <div class="form-group">
@@ -102,16 +105,22 @@
             </div>
         </div>
 
-        <div class="mt-4 d-flex justify-content-between">
-            <div>
-                <a id="editPeluqueria" class="btn btn-primary mr-2">Editar</a>
-                <form id="deleteForm" method="post" asp-action="Delete" style="display:inline;">
-                    <input type="hidden" id="deletePeluqueriaId" name="id" />
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta peluquería?');">Eliminar</button>
-                </form>
+        @if (@rol == "Admin")
+        {
+            <div class="mt-4 d-flex justify-content-between">
+                <div>
+                    <a id="editPeluqueria" class="btn btn-primary mr-2">Editar</a>
+                    <form id="deleteForm" method="post" asp-action="Delete" style="display:inline;">
+                        <input type="hidden" id="deletePeluqueriaId" name="id" />
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar esta peluquería?');">Eliminar</button>
+                    </form>
+                </div>
+                <div>
+                    <a id="seleccionarPeluquero" class="btn btn-success mr-2">Mostrar Peluqueros</a>
+                    <a asp-action="CreateServicio" asp-controller="Reserva" asp-route-idpeluqueria="@Model.FirstOrDefault().IdPeluqueria" class="btn btn-warning">Añadir Servicio</a>
+                </div>
             </div>
-            <a id="seleccionarPeluquero" class="btn btn-success">Reservar</a>
-        </div>
+        }
     </div>
 </div>
 

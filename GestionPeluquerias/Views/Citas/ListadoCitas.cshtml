@@ -1,0 +1,96 @@
+﻿@model IEnumerable<GestionPeluquerias.Models.Cita>
+@{
+    ViewData["Title"] = "Listado de Citas";
+}
+
+<div class="container mt-4 mb-5">
+    <div class="card border-0 shadow-sm">
+        <div class="card-header bg-primary text-white py-3">
+            <h2 class="mb-0">Listado de Citas</h2>
+        </div>
+
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="px-3 py-3">
+                                @Html.DisplayNameFor(model => model.IdCita)
+                            </th>
+                            <th class="px-3 py-3">
+                                Nombre
+                            </th>
+                            <th class="px-3 py-3">
+                                Pelquería
+                            </th>
+                            <th class="px-3 py-3">
+                                Peluquero
+                            </th>
+                            <th class="px-3 py-3">
+                                Servicio
+                            </th>
+                            <th class="px-3 py-3">
+                                @Html.DisplayNameFor(model => model.FechaCita)
+                            </th>
+                            <th class="px-3 py-3">
+                                @Html.DisplayNameFor(model => model.HoraCita)
+                            </th>
+                            <th class="px-3 py-3">
+                                @Html.DisplayNameFor(model => model.Estado)
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model != null && Model.Any())
+                        {
+                            @foreach (var item in Model)
+                            {
+                                <tr>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.IdCita)
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.Usuario.Nombre)
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.Peluqueria.Nombre)
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.Peluquero.Usuario.Nombre)
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.Servicio.Nombre)
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.FechaCita)
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.HoraCita)
+                                    </td>
+                                    <td class="px-3 py-2">
+                                        @Html.DisplayFor(modelItem => item.Estado)
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    No hay citas disponibles para mostrar.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center py-3">
+            <span class="text-muted">Total: @(Model?.Count() ?? 0) citas</span>
+            <a asp-action="Index" asp-controller="Home" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+</div>

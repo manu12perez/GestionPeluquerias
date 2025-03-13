@@ -13,13 +13,11 @@ namespace GestionPeluquerias.Data
         public DbSet<Peluquero> Peluqueros { get; set; }
         public DbSet<Rol> Roles { get; set; }
         public DbSet<Servicio> Servicios { get; set; }
-        public DbSet<VistaPeluqueriaDetalle> PeluqueriaDetalles { get; set; } // Vista PeluqueriaDetalle
+        public DbSet<VistaPeluqueriaDetalle> PeluqueriaDetalles { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            base.OnModelCreating(modelBuilder);
-
-            
+            base.OnModelCreating(modelBuilder);            
 
             // Relación 1 a 1: Usuario - Peluquero (No todos los usuarios son peluqueros)
             modelBuilder.Entity<Peluquero>()
@@ -41,9 +39,7 @@ namespace GestionPeluquerias.Data
                 .HasOne(s => s.Peluqueria)
                 .WithMany(p => p.Servicios)
                 .HasForeignKey(s => s.IdPeluqueria)
-                .OnDelete(DeleteBehavior.Cascade);
-
-            
+                .OnDelete(DeleteBehavior.Cascade);            
 
             // Relación 1 a N: Usuario - Citas
             modelBuilder.Entity<Usuario>()

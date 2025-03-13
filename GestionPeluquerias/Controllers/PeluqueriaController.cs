@@ -74,7 +74,7 @@ namespace GestionPeluquerias.Controllers
 
 
         // Vista para editar una peluquería
-        public async Task<IActionResult> Edit(int id)
+        public async Task<IActionResult> Edit(int id, bool redirectToCrearPeluquero = false)
         {
             Peluqueria peluqueria = await repoPelu.FindPeluqueriaAsync(id);
             if (peluqueria == null)
@@ -83,15 +83,22 @@ namespace GestionPeluquerias.Controllers
             }
 
             ViewBag.Administradores = await GetAdministradoresSelectList();
+            ViewData["REDIRECTTOCREARPELUQUERO"] = redirectToCrearPeluquero;
             return View(peluqueria);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Peluqueria peluqueria)
+        public async Task<IActionResult> Edit(Peluqueria peluqueria, bool redirectToCrearPeluquero = false)
         {
             await repoPelu.UpdatePeluqueriaAsync(peluqueria);
+            if (redirectToCrearPeluquero)
+            {
+                return RedirectToAction("CreatePeluquero", "Reserva", new { idpeluqueria = peluqueria.IdPeluqueria });
+            }
+
+            // Si no, volvemos al listado normal
             return RedirectToAction("Index");
-            
+
         }
 
         // Método para eliminar una peluquería

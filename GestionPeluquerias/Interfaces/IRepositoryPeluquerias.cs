@@ -17,6 +17,9 @@ namespace GestionPeluquerias.Interfaces
         Task InserServicioAsync(Servicio servicio);
         Task InsertCitaAsync(Cita cita);
         Task<List<Peluquero>> GetPeluquerosByIdPeluqueria(int idPeluqueria);
+        Task<List<Cita>> GetCitasByIdAsync(int idUsuario);
+        Task<List<Usuario>> GetPeluquerosAsync();
+        Task<List<Cita>> GetCitasPeluqeros(int idUsuario);
     }
     #endregion
 
