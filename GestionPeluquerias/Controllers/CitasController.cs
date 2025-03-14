@@ -1,4 +1,5 @@
 ﻿using System.Security.Claims;
+using GestionPeluquerias.Filters;
 using GestionPeluquerias.Interfaces;
 using GestionPeluquerias.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +19,7 @@ namespace GestionPeluquerias.Controllers
             this.repoUsuarios = repoUsuarios;
         }
 
-
+        [CustomAuthorize]
         public async Task<IActionResult> AgregarCita(int idpeluqueria, int idservicio)
         {
             ViewData["IDPELUQUERIA"] = idpeluqueria;
@@ -28,6 +29,8 @@ namespace GestionPeluquerias.Controllers
 
             return View();
         }
+
+        [CustomAuthorize]
         [HttpPost]
         public async Task<IActionResult> AgregarCita(Cita cita)
         {
@@ -43,6 +46,7 @@ namespace GestionPeluquerias.Controllers
             return string.IsNullOrEmpty(userIdClaim) ? 0 : int.Parse(userIdClaim);
         }
 
+        [CustomAuthorize]
         public async Task<IActionResult> Citas()
         {
             var idusuario = GetUserId();
